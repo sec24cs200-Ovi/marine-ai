@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marine AI – Agentic Marine Intelligence & Smart Fishing Decision Support</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet GIS Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-container">
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-logo-wrapper">
+        <div class="brand-icon">
+          <i class="fa-solid fa-water"></i>
+        </div>
+        <div class="brand-title">
+          <span class="brand-name">Marine AI</span>
+          <span class="brand-subtitle">Agentic Marine Intelligence for Fishermen</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center-widgets">
+      <div class="header-widget location-selector">
+        <i class="fa-solid fa-location-dot"></i>
+        <select id="coastal-region-select" onchange="changeRegion(this.value)">
+          <option value="rameswaram" selected>Rameswaram, Tamil Nadu 📍</option>
+          <option value="visakhapatnam">Visakhapatnam, Andhra Pradesh 📍</option>
+          <option value="kochi">Kochi, Kerala 📍</option>
+          <option value="veraval">Veraval, Gujarat 📍</option>
+          <option value="paradip">Paradip, Odisha 📍</option>
+        </select>
+      </div>
+
+      <div class="header-widget weather-mini">
+        <i class="fa-solid fa-cloud-sun"></i>
+        <span id="header-weather-text">28.2°C | Fair Sea | Wind 12 km/h</span>
+      </div>
+
+      <div class="header-widget clock-mini">
+        <i class="fa-solid fa-clock"></i>
+        <span id="header-clock-text">10:30:18 AM IST</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Multilingual Selector -->
+      <div class="language-selector">
+        <i class="fa-solid fa-language"></i>
+        <select id="language-select" onchange="switchLanguage(this.value)">
+          <option value="en" selected>English</option>
+          <option value="ta">தமிழ் (Tamil)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="ml">മലയാളം (Malayalam)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="gu">ગુજરાતી (Gujarati)</option>
+          <option value="bn">বাংলা (Bengali)</option>
+          <option value="or">ଓଡ଼ିଆ (Odia)</option>
+          <option value="mr">मराठी (Marathi)</option>
+        </select>
+      </div>
+
+      <!-- Notifications -->
+      <button class="icon-btn" title="Alerts & Advisories" onclick="switchNav('alerts')">
+        <i class="fa-solid fa-bell"></i>
+        <span class="badge-dot"></span>
+      </button>
+
+      <!-- Fisherman Profile -->
+      <div class="fisherman-profile" title="Vessel: IND-TN-10-MM-4421">
+        <div class="profile-avatar">KR</div>
+        <div class="profile-info">
+          <span class="profile-name">K. Rameshan</span>
+          <span class="profile-boat">IND-TN-10-MM-4421</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN BODY -->
+  <div class="main-body">
+
+    <!-- LEFT SIDEBAR NAVIGATION -->
+    <!-- LEFT SIDEBAR NAVIGATION - PERSISTENT AT ALL TIMES -->
+    <aside class="sidebar">
+      <div class="sidebar-header-label">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>SECTIONS & FEATURES</span>
+      </div>
+      <nav class="nav-menu">
+        <a class="nav-item active" onclick="switchNav('dashboard', this)" id="nav-dashboard">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-grip"></i>
+            <span data-i18n="nav_dashboard">Dashboard</span>
+          </div>
+          <span class="nav-badge badge-cyan">OVERVIEW</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('ai-assistant', this)" id="nav-ai-assistant">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-robot"></i>
+            <span data-i18n="nav_assistant">AI Marine Assistant</span>
+          </div>
+          <span class="nav-badge badge-green">AI ACTIVE</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('gis-map', this)" id="nav-gis-map">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-map-location-dot"></i>
+            <span data-i18n="nav_map">Marine Intelligence Map</span>
+          </div>
+          <span class="nav-badge badge-blue">GIS MAP</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('pfz-zones', this)" id="nav-pfz-zones">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-fish"></i>
+            <span data-i18n="nav_pfz">Fishing Zone / PFZ</span>
+          </div>
+          <span class="nav-badge badge-amber">94% YIELD</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('sea-safety', this)" id="nav-sea-safety">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span data-i18n="nav_safety">Sea Safety</span>
+          </div>
+          <span class="nav-badge badge-green">SAFE</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('satellite-telemetry', this)" id="nav-satellite-telemetry">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span data-i18n="nav_telemetry">Satellite Telemetry</span>
+          </div>
+          <span class="nav-badge badge-cyan">ISRO</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('equipment', this)" id="nav-equipment">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-microchip"></i>
+            <span data-i18n="nav_equipment">Equipment Monitoring</span>
+          </div>
+          <span class="nav-badge badge-teal">MCU</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('route-planner', this)" id="nav-route-planner">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-route"></i>
+            <span data-i18n="nav_route">Safe Route Planner</span>
+          </div>
+          <span class="nav-badge badge-blue">158° SSE</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('alerts', this)" id="nav-alerts">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span data-i18n="nav_alerts">Alerts & Advisories</span>
+          </div>
+          <span class="nav-badge badge-red">2 ALERTS</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('marine-data', this)" id="nav-marine-data">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-database"></i>
+            <span data-i18n="nav_data">Marine Data</span>
+          </div>
+          <span class="nav-badge badge-cyan">OPEN-METEO</span>
+        </a>
+        <a class="nav-item" onclick="switchNav('services', this)" id="nav-services">
+          <div class="nav-item-left">
+            <i class="fa-solid fa-handshake"></i>
+            <span data-i18n="nav_services">Fisherman Services</span>
+          </div>
+          <span class="nav-badge badge-purple">AUCTIONS</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="agent-status-mini">
+          <span class="pulse-dot"></span>
+          <span>ORCA Agents Active (9/9)</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT VIEW AREA -->
+    <main class="content-area">
+
+      <!-- ================= VIEW 1: DASHBOARD OVERVIEW ================= -->
+      <div id="view-dashboard" class="view-panel active">
+        <div class="dashboard-grid">
+
+          <!-- MAIN LEFT COLUMN (Map + Lower Row Cards) -->
+          <div class="grid-main-left">
+            
+            <!-- SECTION 2: MARINE INTELLIGENCE MAP -->
+            <div class="card map-card">
+              <div class="map-header">
+                <div class="card-title">
+                  <i class="fa-solid fa-earth-asia"></i>
+                  <span data-i18n="title_map">Marine Intelligence Map</span>
+                </div>
+                <div class="map-layer-controls">
+                  <button class="layer-btn active" onclick="toggleMapLayer('pfz', this)"><i class="fa-solid fa-fish"></i> PFZ</button>
+                  <button class="layer-btn" onclick="toggleMapLayer('sst', this)"><i class="fa-solid fa-temperature-half"></i> SST</button>
+                  <button class="layer-btn" onclick="toggleMapLayer('chlorophyll', this)"><i class="fa-solid fa-leaf"></i> Chlorophyll</button>
+                  <button class="layer-btn" onclick="toggleMapLayer('wind', this)"><i class="fa-solid fa-wind"></i> Wind/Waves</button>
+                  <button class="layer-btn" onclick="toggleMapLayer('geofence', this)"><i class="fa-solid fa-shield-cat"></i> IMBL Geofence</button>
+                </div>
+              </div>
+
+              <!-- Leaflet Map Div -->
+              <div id="leaflet-map"></div>
+
+              <!-- Map Legend Overlay -->
+              <div class="map-legend-overlay">
+                <div class="legend-item"><span class="legend-color color-green"></span> Favourable PFZ Zone</div>
+                <div class="legend-item"><span class="legend-color color-yellow"></span> Moderate Zone</div>
+                <div class="legend-item"><span class="legend-color color-red"></span> Unsafe / Low Zone</div>
+                <div class="legend-item"><span class="legend-color color-blue"></span> Boat (IND-TN-10)</div>
+                <div class="legend-item"><span class="legend-color color-route"></span> Recommended Route</div>
+                <div class="legend-item"><span class="legend-color color-restricted"></span> Restricted IMBL Geofence</div>
+              </div>
+            </div>
+
+            <!-- LOWER ROW GRID (Ocean Telemetry, Sea Safety, Fishing Zones) -->
+            <div class="lower-dashboard-grid">
+
+              <!-- SECTION 6: ISRO SATELLITE & OCEANOGRAPHIC TELEMETRY CARD -->
+              <div class="card equipment-monitoring-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Live Oceanographic Telemetry</span>
+                  </div>
+                  <span class="card-badge badge-safe" id="sat-badge">ISRO ONLINE</span>
+                </div>
+
+                <div class="telemetry-primary-grid">
+                  <div class="telemetry-box">
+                    <div class="telemetry-label">Sea Temp (SST)</div>
+                    <div class="telemetry-value" id="val-sst-temp">28.3 °C</div>
+                    <div class="telemetry-status status-ok">Optimal</div>
+                  </div>
+                  <div class="telemetry-box">
+                    <div class="telemetry-label">Chlorophyll-a</div>
+                    <div class="telemetry-value" id="val-chlorophyll">3.1 mg/m³</div>
+                    <div class="telemetry-status status-ok">High Bloom</div>
+                  </div>
+                  <div class="telemetry-box">
+                    <div class="telemetry-label">Swell Period</div>
+                    <div class="telemetry-value" id="val-swell-period">9.2 sec</div>
+                    <div class="telemetry-status status-ok">Calm Sea</div>
+                  </div>
+                  <div class="telemetry-box">
+                    <div class="telemetry-label">Wind Speed</div>
+                    <div class="telemetry-value" id="val-wind-speed">12 km/h</div>
+                    <div class="telemetry-status status-ok">Favourable</div>
+                  </div>
+                </div>
+
+                <!-- Live Oceanography Chart -->
+                <div class="chart-container">
+                  <canvas id="tensionChart"></canvas>
+                </div>
+
+                <div class="ai-interpretation-banner" id="ai-tangle-callout">
+                  <i class="fa-solid fa-satellite"></i>
+                  <span><strong>Oceanographic Analysis:</strong> Thermal boundary convergence & high Chlorophyll bloom detected near Zone B. Optimal pelagic fish environment.</span>
+                </div>
+
+                <!-- Satellite Controls -->
+                <div class="simulation-btn-group">
+                  <button class="sim-btn" onclick="refreshSatelliteFeed()">🔄 Refresh Feed</button>
+                  <button class="sim-btn" onclick="toggleThermalOverlay()">📡 Thermal Front Overlay</button>
+                </div>
+              </div>
+
+              <!-- SECTION 3: SEA SAFETY FORECAST -->
+              <div class="card sea-safety-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span data-i18n="title_safety">Sea Safety Forecast</span>
+                  </div>
+                  <span class="card-badge badge-safe">INCOIS VERIFIED</span>
+                </div>
+
+                <div class="safety-status-header" id="safety-status-box">
+                  <div class="safety-icon"><i class="fa-solid fa-circle-check"></i></div>
+                  <div class="safety-info-main">
+                    <span class="safety-headline">SAFE TO GO</span>
+                    <span class="safety-subtext">Suitable conditions for fishing tomorrow morning (04:00 AM – 11:30 AM)</span>
+                  </div>
+                </div>
+
+                <div class="weather-params-grid">
+                  <div class="param-item">
+                    <i class="fa-solid fa-water param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Wave Height</span>
+                      <span class="param-val">0.8 m</span>
+                    </div>
+                  </div>
+                  <div class="param-item">
+                    <i class="fa-solid fa-wind param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Wind Speed</span>
+                      <span class="param-val">12 km/h</span>
+                    </div>
+                  </div>
+                  <div class="param-item">
+                    <i class="fa-solid fa-cloud-rain param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Rainfall</span>
+                      <span class="param-val">Low (5%)</span>
+                    </div>
+                  </div>
+                  <div class="param-item">
+                    <i class="fa-solid fa-bolt param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Lightning</span>
+                      <span class="param-val">None</span>
+                    </div>
+                  </div>
+                  <div class="param-item">
+                    <i class="fa-solid fa-hurricane param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Cyclone</span>
+                      <span class="param-val">No Alert</span>
+                    </div>
+                  </div>
+                  <div class="param-item">
+                    <i class="fa-solid fa-person-swimming param-icon"></i>
+                    <div class="param-details">
+                      <span class="param-title">Tide</span>
+                      <span class="param-val">+0.4m Flood</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="explainable-why-box">
+                  <div class="explainable-title">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Why is it safe? (Explainable AI)</span>
+                  </div>
+                  <p>Wind speeds remain below 15 knots and ocean swells are stable at 0.8m. INSAT-3DR satellite telemetry indicates zero convective storm formation in Gulf of Mannar sector.</p>
+                </div>
+              </div>
+
+              <!-- SECTION 4: FISHING ZONE RECOMMENDATION -->
+              <div class="card pfz-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i class="fa-solid fa-fish"></i>
+                    <span data-i18n="title_pfz">Potential Fishing Zones</span>
+                  </div>
+                  <button class="layer-btn" onclick="switchNav('pfz-zones')">View All</button>
+                </div>
+
+                <div class="pfz-list">
+                  <div class="pfz-item active-zone" onclick="focusZone('Zone B')">
+                    <div class="pfz-name-group">
+                      <span class="pfz-name">Zone B – 12 km SSE <i class="fa-solid fa-star" style="color:#f59e0b; font-size:0.7rem;"></i></span>
+                      <span class="pfz-sub">High Potential (Confidence 94%)</span>
+                    </div>
+                    <div class="pfz-factors">
+                      <span class="pfz-factor-tag">SST 28.3°C</span>
+                      <span class="pfz-factor-tag">Chl 3.1 mg/m³</span>
+                    </div>
+                  </div>
+
+                  <div class="pfz-item" onclick="focusZone('Zone A')">
+                    <div class="pfz-name-group">
+                      <span class="pfz-name">Zone A – 8 km E</span>
+                      <span class="pfz-sub">High Potential</span>
+                    </div>
+                    <div class="pfz-factors">
+                      <span class="pfz-factor-tag">SST 28.1°C</span>
+                      <span class="pfz-factor-tag">Chl 2.8 mg/m³</span>
+                    </div>
+                  </div>
+
+                  <div class="pfz-item" onclick="focusZone('Zone C')">
+                    <div class="pfz-name-group">
+                      <span class="pfz-name">Zone C – 18 km SE</span>
+                      <span class="pfz-sub">Moderate Potential</span>
+                    </div>
+                    <div class="pfz-factors">
+                      <span class="pfz-factor-tag">SST 27.5°C</span>
+                    </div>
+                  </div>
+
+                  <div class="pfz-item" style="border-left: 3px solid var(--status-unsafe);" onclick="focusZone('Zone D')">
+                    <div class="pfz-name-group">
+                      <span class="pfz-name" style="color:#f87171;">Zone D – 25 km E (Avoid)</span>
+                      <span class="pfz-sub">Unsafe – IMBL Geofence Proximity</span>
+                    </div>
+                    <div class="pfz-factors">
+                      <span class="pfz-factor-tag" style="background:rgba(239,68,68,0.2); color:#f87171;">High Swell</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- MAIN RIGHT COLUMN (Conversational AI + Collaborative Reasoning) -->
+          <div class="grid-main-right">
+
+            <!-- SECTION 1: AI MARINE ASSISTANT -->
+            <div class="card assistant-card">
+              <div class="assistant-header">
+                <div class="card-title">
+                  <i class="fa-solid fa-robot"></i>
+                  <span data-i18n="title_assistant">Marine AI Assistant</span>
+                </div>
+                <button class="icon-btn" onclick="toggleVoiceOutput()" id="voice-toggle-btn" title="Toggle Voice Output (TTS)">
+                  <i class="fa-solid fa-volume-high"></i>
+                </button>
+              </div>
+
+              <div class="chat-body" id="chat-body">
+                <!-- System Welcome Message -->
+                <div class="chat-message system">
+                  <div class="msg-bubble">
+                    <strong>வணக்கம்! / Hello!</strong> I am <strong>Marine AI</strong>, your agentic ocean decision assistant powered by ISRO satellite observation data. Ask me anything about sea safety, fishing zones, or net equipment.
+                  </div>
+                </div>
+
+                <div class="suggested-prompts">
+                  <div class="prompt-chip" onclick="askQuestion('Is it safe to go to sea tomorrow morning?')">
+                    💬 "Is it safe to go to sea tomorrow morning?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('Where is the nearest potential fishing zone?')">
+                    💬 "Where is the nearest potential fishing zone?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('Show me a safe route to the recommended fishing zone.')">
+                    💬 "Show me a safe route to Zone B."
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('What is my current tangle and tear risk?')">
+                    💬 "What is my current tangle and tear risk?"
+                  </div>
+                </div>
+              </div>
+
+              <div class="chat-input-area">
+                <button class="icon-btn mic-btn" id="dash-mic-btn" onclick="startVoiceRecognition('chat-input')" title="Click to speak (Voice Input)" style="background: rgba(6, 182, 212, 0.15); border-color: var(--primary-cyan); color: var(--primary-cyan); margin-right: 0.4rem;">
+                  <i class="fa-solid fa-microphone" id="dash-mic-icon"></i>
+                </button>
+                <input type="text" id="chat-input" placeholder="Ask about sea safety, routes, fishing..." onkeypress="handleChatKeyPress(event)">
+                <button class="send-btn" onclick="sendUserMessage()">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+
+              </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ================= VIEW 2: AI ASSISTANT FULL VIEW ================= -->
+      <div id="view-ai-assistant" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="ai-assistant"></div>
+          <div class="view-right-content">
+            <div class="card" style="height: 100%; display: flex; flex-direction: column; padding: 1.25rem;">
+              
+              <!-- Card Header & Controls -->
+              <div class="card-header" style="padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title">
+                    <i class="fa-solid fa-robot" style="color: var(--primary-cyan);"></i>
+                    <span data-i18n="nav_assistant">Conversational Marine AI Assistant</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <button class="icon-btn" onclick="toggleVoiceOutput()" id="voice-toggle-btn-full" title="Toggle Voice Output (TTS)">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                  <span class="card-badge badge-safe"><i class="fa-solid fa-signal"></i> ORCA AGENTS ONLINE</span>
+                </div>
+              </div>
+
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
+                Ask detailed queries in English or Indian regional languages via text or voice input regarding oceanographic parameters, satellite thermal fronts, equipment telemetry, or regulatory advisories.
+              </p>
+
+              <!-- Full Chat Body -->
+              <div class="chat-body" id="full-chat-body" style="flex: 1; min-height: 250px; overflow-y: auto; background: rgba(3, 7, 18, 0.4); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 0.75rem;">
+                <!-- System Welcome Message -->
+                <div class="chat-message system">
+                  <div class="msg-bubble">
+                    <strong>வணக்கம்! / Hello!</strong> I am <strong>Marine AI (ORCA Engine)</strong>, your agentic ocean decision assistant powered by ISRO satellite observation data. You can type or tap the microphone to speak your question!
+                  </div>
+                </div>
+
+                <!-- Quick Prompt Chips -->
+                <div class="suggested-prompts" style="margin-top: 0.75rem;">
+                  <div class="prompt-chip" onclick="askQuestion('Is it safe to go to sea tomorrow morning?')">
+                    💬 "Is it safe to go to sea tomorrow morning?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('Where is the nearest potential fishing zone?')">
+                    💬 "Where is the nearest potential fishing zone?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('What depth and net mesh to use for Tuna?')">
+                    💬 "What depth and net mesh to use for Tuna?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('What is my current tangle and tear risk?')">
+                    💬 "What is my current tangle and tear risk?"
+                  </div>
+                  <div class="prompt-chip" onclick="askQuestion('What is the Coast Guard emergency helpline?')">
+                    💬 "Coast Guard SOS helpline"
+                  </div>
+                </div>
+              </div>
+
+              <!-- Full Chat Input Bar with Microphone Speech Button -->
+              <div class="chat-input-area" style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="icon-btn mic-btn" id="full-mic-btn" onclick="startVoiceRecognition('full-chat-input')" title="Click to speak (Voice Search)" style="background: rgba(6, 182, 212, 0.15); border-color: var(--primary-cyan); color: var(--primary-cyan); padding: 0.6rem 0.9rem;">
+                  <i class="fa-solid fa-microphone" id="full-mic-icon"></i>
+                </button>
+
+                <input type="text" id="full-chat-input" placeholder="Ask about sea safety, species, routes, fishing, or tap 🎙️ to speak..." onkeypress="handleFullChatKeyPress(event)" style="flex: 1;">
+
+                <button class="send-btn" onclick="sendFullUserMessage()">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 3: FULL GIS MAP VIEW ================= -->
+      <div id="view-gis-map" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="gis-map"></div>
+          <div class="view-right-content">
+            <div class="card" style="height: 100%; padding:0; display:flex; flex-direction:column;">
+              <div class="map-header" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-earth-asia"></i> <span data-i18n="title_map">Full Widescreen Marine Intelligence GIS Map</span></div>
+                </div>
+              </div>
+              <div id="gis-full-map" style="flex:1; width:100%; background:#040914;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 4: FISHING ZONES (PFZ) ================= -->
+      <div id="view-pfz-zones" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="pfz-zones"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-fish"></i> <span data-i18n="title_pfz">ISRO OceanSat-3 Potential Fishing Zone (PFZ) Advisories</span></div>
+                </div>
+              </div>
+              <p style="color:var(--text-muted); margin-bottom:1rem;">Derived from Chlorophyll Concentration (OCM-3) and Sea Surface Temperature (SST) Thermal Gradients.</p>
+              <div class="pfz-list" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="pfz-item active-zone">
+                  <div>
+                    <h4>Zone B – 12.4 Nautical Miles SSE</h4>
+                    <p>Confidence: 94% | Species: Mackerel, Sardines, Tuna</p>
+                    <small>SST: 28.3°C | Chlorophyll: 3.1 mg/m³ | Wind: 12 km/h</small>
+                  </div>
+                  <button class="layer-btn active" onclick="switchNav('dashboard'); focusZone('Zone B');">Plot Route</button>
+                </div>
+                <div class="pfz-item">
+                  <div>
+                    <h4>Zone A – 8.1 Nautical Miles East</h4>
+                    <p>Confidence: 89% | Species: Seerfish, Anchovies</p>
+                    <small>SST: 28.1°C | Chlorophyll: 2.8 mg/m³ | Wind: 11 km/h</small>
+                  </div>
+                  <button class="layer-btn" onclick="switchNav('dashboard'); focusZone('Zone A');">Plot Route</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 5: SEA SAFETY ================= -->
+      <div id="view-sea-safety" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="sea-safety"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="title_safety">INCOIS Sea Safety Forecast & Cyclone Early Warning</span></div>
+                </div>
+              </div>
+              <p style="color:var(--text-muted);">High-resolution wave state models and weather satellite analysis for Indian coastal waters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 6: SATELLITE TELEMETRY ================= -->
+      <div id="view-satellite-telemetry" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="satellite-telemetry"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-satellite-dish"></i> <span data-i18n="title_telemetry">ISRO Earth Observation & Oceanographic Telemetry Stream</span></div>
+                </div>
+                <span class="card-badge badge-safe">ISRO OceanSat-3 & INCOIS Feed</span>
+              </div>
+              <p style="color:var(--text-muted); margin-bottom:1rem;">Real-time Sea Surface Temperature (SST), Chlorophyll-a optical density, sea swell dynamics, and surface wind vectors streamed from satellite Earth observation data.</p>
+              <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:1rem;">
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Sea Surface Temp (SST)</div>
+                  <div class="telemetry-value">28.3 °C</div>
+                  <div class="telemetry-status status-ok">Optimal Front</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Chlorophyll-a Bloom</div>
+                  <div class="telemetry-value">3.1 mg/m³</div>
+                  <div class="telemetry-status status-ok">High Plankton Density</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">NavIC Satellite Signals</div>
+                  <div class="telemetry-value">14 Locked</div>
+                  <div class="telemetry-status status-ok">Sub-Meter Precision</div>
+                </div>
+                <div class="telemetry-box">
+                  <div class="telemetry-label">Atmospheric Sounder</div>
+                  <div class="telemetry-value">INSAT-3DR</div>
+                  <div class="telemetry-status status-ok">Zero Squall Risk</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 7: EQUIPMENT MONITORING & MICROPROCESSOR SERIAL MONITOR ================= -->
+      <div id="view-equipment" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="equipment"></div>
+          <div class="view-right-content">
+            
+            <!-- Top Navigation & Header Card -->
+            <div class="card equipment-header-card" style="margin-bottom: 1rem;">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-microchip" style="color:var(--primary-cyan);"></i> <span>Load Cell & Net Tension Telemetry Monitor</span></div>
+                </div>
+                
+                <div class="serial-controls-bar" style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                  <div class="serial-config-item" style="display: flex; align-items: center;">
+                    <label for="serial-baud-rate" style="font-size:0.75rem; color:var(--text-muted); margin-right:0.3rem;">Baud:</label>
+                    <select id="serial-baud-rate" class="serial-select" onchange="syncBaudRate(this.value)">
+                      <option value="9600" selected>9600 baud</option>
+                      <option value="19200">19200 baud</option>
+                      <option value="38400">38400 baud</option>
+                      <option value="57600">57600 baud</option>
+                      <option value="115200">115200 baud</option>
+                    </select>
+                  </div>
+                  <button id="btn-connect-serial" class="serial-btn serial-btn-primary" onclick="toggleSerialConnection()">
+                    <i class="fa-solid fa-plug"></i> <span id="lbl-connect-btn">Connect USB Device</span>
+                  </button>
+                  <button id="btn-sim-serial" class="serial-btn serial-btn-secondary" onclick="toggleSerialSimulation()">
+                    <i class="fa-solid fa-play"></i> <span id="lbl-sim-btn">Simulate Hardware Feed</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SMART NET MONITOR BANNER CARD (User Reference Screenshot 2 Format) -->
+            <div class="smart-net-banner" id="smart-net-banner-box">
+              <div class="smart-net-header">
+                <span class="smart-net-title"><i class="fa-solid fa-network-wired"></i> SMART NET MONITOR (BETA)</span>
+                <span class="smart-net-badge" id="smart-net-status-badge">SAFE</span>
+              </div>
+              
+              <div class="smart-net-main-row">
+                <div class="smart-net-load-block">
+                  <span class="smart-net-label">LOAD VALUE</span>
+                  <div class="smart-net-reading" id="smart-net-load-reading">
+                    <i class="fa-solid fa-computer-mouse" style="font-size:1.1rem; opacity:0.8;"></i> Hardware Disconnected / Waiting...
+                  </div>
+                </div>
+
+                <div class="smart-net-controls">
+                  <button class="smart-net-btn-connect" onclick="toggleSerialConnection()">
+                    <i class="fa-solid fa-bolt"></i> <span id="banner-connect-lbl">CONNECT DEVICE</span>
+                  </button>
+                  <div class="smart-net-baud-box">
+                    <span>BAUD:</span>
+                    <select id="banner-baud-select" class="smart-net-baud-select" onchange="syncBaudRate(this.value)">
+                      <option value="9600" selected>9600</option>
+                      <option value="19200">19200</option>
+                      <option value="38400">38400</option>
+                      <option value="57600">57600</option>
+                      <option value="115200">115200</option>
+                    </select>
+                    <i class="fa-solid fa-gear" style="font-size:0.75rem;"></i>
+                  </div>
+                  <button class="smart-net-btn-simulate" onclick="toggleSerialSimulation()">
+                    <span id="banner-sim-lbl">SIMULATE</span> <i class="fa-solid fa-rotate"></i>
+                  </button>
+                </div>
+
+                <div class="smart-net-stress-block">
+                  <span class="smart-net-label">STRESS</span>
+                  <div class="smart-net-stress-val" id="smart-net-stress-val">N/A</div>
+                </div>
+              </div>
+
+              <div class="smart-net-hint">
+                <i class="fa-solid fa-lightbulb"></i> Click your COM port (e.g., USB SER (COM9)) in the browser popup and click Connect.
+              </div>
+            </div>
+
+            <!-- Dedicated Load Cell & Net Tension Sensor Metric Cards -->
+            <div class="equipment-sensor-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+              
+              <!-- Metric Card 1: Load Cell Measurement -->
+              <div class="card sensor-gauge-card" style="padding: 1.2rem;">
+                <div class="sensor-card-header">
+                  <span class="sensor-icon" style="color:var(--primary-cyan); font-size:1.2rem;"><i class="fa-solid fa-weight-hanging"></i></span>
+                  <span class="sensor-title" style="font-size:0.9rem; font-weight:700;">Load Cell Sensor Measurement</span>
+                  <span id="badge-load-status" class="sensor-badge badge-ok">Normal</span>
+                </div>
+                <div class="sensor-display-val" style="margin: 0.5rem 0;">
+                  <span id="val-load-cell" class="sensor-number" style="font-size: 2.2rem; color:var(--primary-cyan);">--</span>
+                  <span class="sensor-unit" style="font-size:1.1rem; font-weight:700; color:var(--primary-cyan);">kg</span>
+                </div>
+                <div class="gauge-bar-bg" style="height:8px;">
+                  <div id="bar-load-cell" class="gauge-bar-fill" style="width: 0%; background: var(--primary-cyan);"></div>
+                </div>
+                <div class="sensor-sub-info" style="margin-top:0.5rem; font-size:0.78rem;">
+                  <span>Max Rated Capacity: <strong>500 kg</strong></span>
+                  <span>Load Cell State: <strong id="val-load-state" style="color:var(--status-safe);">READY</strong></span>
+                </div>
+              </div>
+
+              <!-- Metric Card 2: Net Tension Strain Gauge -->
+              <div class="card sensor-gauge-card" style="padding: 1.2rem;">
+                <div class="sensor-card-header">
+                  <span class="sensor-icon" style="color:var(--accent-teal); font-size:1.2rem;"><i class="fa-solid fa-anchor"></i></span>
+                  <span class="sensor-title" style="font-size:0.9rem; font-weight:700;">Trawl Net Tension & Strain</span>
+                  <span id="badge-tension-status" class="sensor-badge badge-ok">Normal</span>
+                </div>
+                <div class="sensor-display-val" style="margin: 0.5rem 0;">
+                  <span id="val-net-tension" class="sensor-number" style="font-size: 2.2rem; color:var(--accent-teal);">--</span>
+                  <span class="sensor-unit" style="font-size:1.1rem; font-weight:700; color:var(--accent-teal);">kN</span>
+                </div>
+                <div class="gauge-bar-bg" style="height:8px;">
+                  <div id="bar-net-tension" class="gauge-bar-fill" style="width: 0%; background: var(--accent-teal);"></div>
+                </div>
+                <div class="sensor-sub-info" style="margin-top:0.5rem; font-size:0.78rem;">
+                  <span>Net Capacity: <strong>5.0 kN</strong></span>
+                  <span id="alert-net-snag" style="color:var(--text-muted);">Tangle Risk: <strong>LOW</strong></span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Main Workspace Split: Serial Monitor Console (Left) & Load Cell Wiring Code (Right) -->
+            <div class="equipment-main-workspace" style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem;">
+              
+              <!-- Serial Monitor Console Terminal -->
+              <div class="card terminal-card">
+                <div class="terminal-header" style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-terminal" style="color:var(--primary-cyan);"></i>
+                    <strong style="color:var(--text-white); font-size:0.9rem;">Load & Tension Microprocessor Serial Console</strong>
+                  </div>
+                  <div class="terminal-actions" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label class="terminal-checkbox-lbl" style="font-size:0.75rem; color:var(--text-muted); cursor:pointer;">
+                      <input type="checkbox" id="chk-autoscroll" checked> Auto-Scroll
+                    </label>
+                    <button class="terminal-btn-sm" onclick="clearSerialConsole()" title="Clear Console Log"><i class="fa-solid fa-trash-can"></i> Clear</button>
+                    <button class="terminal-btn-sm" onclick="exportSerialLog()" title="Download Log File"><i class="fa-solid fa-download"></i> Save Log</button>
+                  </div>
+                </div>
+
+                <!-- Terminal Output Window -->
+                <div id="terminal-window" class="terminal-window">
+                  <div class="terminal-welcome-msg">
+                    <span class="term-dim">// Marine AI Load Cell & Net Tension Serial Monitor initialized.</span><br>
+                    <span class="term-dim">// Connect microcontroller via USB COM port (or click "SIMULATE" to test).</span><br>
+                    <span class="term-highlight">READY > Select Baud rate (9600 or 115200 default) and click Connect USB.</span>
+                  </div>
+                </div>
+
+                <!-- Quick Macro Command Buttons -->
+                <div class="terminal-macro-bar" style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; overflow-x: auto; padding-bottom: 0.2rem;">
+                  <span style="font-size:0.7rem; color:var(--text-muted); font-weight:600; white-space:nowrap;">TX Quick Cmds:</span>
+                  <button class="macro-btn" onclick="sendSerialCommand('PING')">PING</button>
+                  <button class="macro-btn" onclick="sendSerialCommand('CALIBRATE_ZERO')">CALIBRATE LOADCELL</button>
+                  <button class="macro-btn" onclick="sendSerialCommand('GET_LOAD')">GET LOAD</button>
+                  <button class="macro-btn" onclick="sendSerialCommand('GET_STATUS')">GET STATUS</button>
+                  <button class="macro-btn" onclick="sendSerialCommand('RESET_MCU')">RESET MCU</button>
+                </div>
+
+                <!-- Command Input Sending Bar -->
+                <div class="terminal-input-bar" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                  <input type="text" id="txt-serial-cmd" class="terminal-input" placeholder="Type serial command to TX to Microprocessor... (e.g. TARE, READ_LOAD, SET_MAX=500)" onkeydown="if(event.key==='Enter') sendCustomSerialCmd()">
+                  <button class="serial-btn serial-btn-primary" onclick="sendCustomSerialCmd()" style="padding: 0.4rem 1rem;"><i class="fa-solid fa-paper-plane"></i> Send TX</button>
+                </div>
+              </div>
+
+              <!-- Microprocessor Setup & Arduino Code Generator -->
+              <div class="card hardware-guide-card" style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div class="card-title" style="font-size:0.95rem;">
+                  <i class="fa-solid fa-code-branch" style="color:var(--status-safe);"></i>
+                  <span>Load Cell (HX711) Firmware Code</span>
+                </div>
+                
+                <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">
+                  Upload this C++ sketch to your <strong>Arduino</strong> or <strong>ESP32</strong> connected to HX711 Load Cell / Strain Gauge sensor to output serial telemetry.
+                </p>
+
+                <!-- Board Selector Tabs -->
+                <div class="board-selector-tabs" style="display:flex; gap:0.3rem;">
+                  <button class="board-tab active" onclick="selectBoardCode('arduino', this)">Arduino C++</button>
+                  <button class="board-tab" onclick="selectBoardCode('esp32', this)">ESP32 WiFi/Serial</button>
+                  <button class="board-tab" onclick="selectBoardCode('python', this)">RPi MicroPython</button>
+                </div>
+
+                <!-- Firmware Snippet Code Box -->
+                <div class="firmware-code-container" style="position:relative;">
+                  <pre id="firmware-code-box" class="firmware-code-box"><code>// Marine AI Smart Net Load Cell Firmware
+#include &lt;Arduino.h&gt;
+#include "HX711.h"
+
+#define LOADCELL_DOUT_PIN  4
+#define LOADCELL_SCK_PIN   5
+
+HX711 scale;
+
+void setup() {
+  Serial.begin(9600); // Smart Net Baud rate
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.set_scale(2280.f);
+  scale.tare(); // Reset load scale to 0
+}
+
+void loop() {
+  if (scale.is_ready()) {
+    float loadKg = scale.get_units(5);
+    float tensionKn = (loadKg * 9.81) / 1000.0;
+    int stressPercent = (loadKg / 500.0) * 100;
+
+    // Output: LOAD:val,TENSION:val,STRESS:val
+    Serial.print("LOAD:"); Serial.print(loadKg, 1);
+    Serial.print(",TENSION:"); Serial.print(tensionKn, 2);
+    Serial.print(",STRESS:"); Serial.println(stressPercent);
+  }
+  delay(1000);
+}</code></pre>
+                  <button class="copy-code-btn" onclick="copyFirmwareCode()"><i class="fa-solid fa-copy"></i> Copy Code</button>
+                </div>
+
+                <div class="ai-interpretation-banner" style="font-size:0.75rem; margin-top:auto;">
+                  <i class="fa-solid fa-microchip"></i>
+                  <span><strong>Hardware Compatible:</strong> Works with standard HX711 Load Cell amplifier modules and strain gauge sensors over USB OTG / COM port.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Real-Time Load & Tension Streaming Graph Card -->
+            <div class="card equipment-chart-card" style="margin-top: 1rem;">
+              <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="card-title">
+                  <i class="fa-solid fa-chart-line" style="color:var(--primary-cyan);"></i>
+                  <span>Live Sensor Telemetry Stream (Load Value kg vs Net Tension kN)</span>
+                </div>
+                <span class="card-badge badge-safe"><i class="fa-solid fa-circle" style="font-size:0.5rem; color:#10b981;"></i> Real-Time Telemetry</span>
+              </div>
+              <div class="chart-container" style="height: 180px; margin-top: 0.5rem;">
+                <canvas id="equipmentSerialChart"></canvas>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 8: ROUTE PLANNER ================= -->
+      <div id="view-route-planner" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="route-planner"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-route"></i> <span data-i18n="nav_route">Safe Navigation & Boundary Avoidance Planner</span></div>
+                </div>
+              </div>
+              <p style="color:var(--text-muted);">AI-generated route geometry from Rameswaram Harbor to Zone B avoiding IMBL restricted maritime zones and dangerous coral head shoals.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 9: ALERTS & ADVISORIES ================= -->
+      <div id="view-alerts" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="alerts"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="nav_alerts">Live Marine Advisories & Geofence Warnings</span></div>
+                </div>
+              </div>
+              <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;">
+                <li class="pfz-item" style="border-left:4px solid var(--status-unsafe);">
+                  <div>
+                    <strong style="color:#f87171;">🚨 High Wave Warning in Sector D</strong>
+                    <p>Wave swell exceeding 2.4m projected between 14:00 - 18:00 IST. Small craft advised to stay within 15nm.</p>
+                  </div>
+                </li>
+                <li class="pfz-item" style="border-left:4px solid var(--status-caution);">
+                  <div>
+                    <strong style="color:#fbbf24;">⚡ Squall Weather Alert - Bay of Bengal</strong>
+                    <p>Isolated convective cloud cluster detected on INSAT-3DR 45nm East. Minor wind gusts up to 22 knots.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 10: MARINE DATA & OCEANOGRAPHIC TELEMETRY ================= -->
+      <div id="view-marine-data" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="marine-data"></div>
+          <div class="view-right-content">
+            
+            <!-- Header Card -->
+            <div class="card" style="margin-bottom: 1rem;">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-water" style="color:var(--primary-cyan);"></i> <span>Oceanographic Telemetry & Marine Data Intelligence</span></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span class="card-badge badge-safe" id="open-meteo-status-badge"><i class="fa-solid fa-circle-check"></i> Live Open-Meteo & OceanSat Feeds Active</span>
+                  <button class="layer-btn active" onclick="triggerOpenMeteoRefresh()"><i class="fa-solid fa-rotate"></i> Refresh Marine Data</button>
+                </div>
+              </div>
+              <p style="color:var(--text-muted); font-size: 0.85rem; margin-top: 0.4rem;">
+                Comprehensive oceanic environmental parameters streamed live from <strong>Open-Meteo Weather & Marine API</strong>, <strong>ISRO OceanSat-3 (OCM-3/SSTM)</strong>, and <strong>INCOIS Ocean Models</strong>.
+              </p>
+            </div>
+
+            <!-- ESSENTIAL OCEAN MEASUREMENTS GRID (Sea Temp, Wind Speed, Waves, Currents, Chlorophyll, Salinity) -->
+            <div class="card" style="margin-bottom: 1rem;">
+              <div class="card-title" style="margin-bottom: 1rem; font-size: 0.95rem; color: var(--primary-cyan);">
+                <i class="fa-solid fa-compass"></i> Live Oceanographic Measurements (<span id="marine-data-location-lbl">Rameswaram, Tamil Nadu</span>)
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;" id="marine-current-grid">
+                <!-- 1. SEA SURFACE TEMPERATURE -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-temperature-half" style="color:#f59e0b;"></i> Sea Surface Temp (SST)</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">ISRO SSTM</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-sst-temp" style="color:#f59e0b; font-size:1.8rem; font-weight:800;">28.3 °C</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-sst-status" style="margin-top:0.3rem;">Optimal Thermal Front</div>
+                </div>
+
+                <!-- 2. WIND SPEED & DIRECTION -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-wind" style="color:#fbbf24;"></i> Wind Speed & Direction</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">10m VECTOR</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-windspeed" style="color:#fbbf24; font-size:1.8rem; font-weight:800;">12.4 km/h</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-windcard" style="margin-top:0.3rem;">Heading 158° SSE (Gusts 15.2 km/h)</div>
+                </div>
+
+                <!-- 3. SIGNIFICANT WAVE HEIGHT -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-water" style="color:#38bdf8;"></i> Significant Wave Height</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">INCOIS WAVE</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-wave-height" style="color:#38bdf8; font-size:1.8rem; font-weight:800;">0.8 m</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-wave-status" style="margin-top:0.3rem;">Calm Sea Swell (Safe)</div>
+                </div>
+
+                <!-- 4. SEA SWELL PERIOD -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-stopwatch" style="color:#14b8a6;"></i> Sea Swell Period</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">SWELL CYCLE</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-swell-period" style="color:#14b8a6; font-size:1.8rem; font-weight:800;">9.2 sec</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-swell-status" style="margin-top:0.3rem;">Low Impact Swell Interval</div>
+                </div>
+
+                <!-- 5. OCEAN CURRENT VELOCITY -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-arrows-spin" style="color:#a78bfa;"></i> Ocean Current Velocity</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">DRIFT VECTOR</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-current-speed" style="color:#a78bfa; font-size:1.8rem; font-weight:800;">0.58 m/s</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-current-dir" style="margin-top:0.3rem;">Eastward Surface Drift (94°)</div>
+                </div>
+
+                <!-- 6. CHLOROPHYLL-A BLOOM -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-leaf" style="color:#10b981;"></i> Chlorophyll-a Bloom</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">OCM-3 SATELLITE</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-chlorophyll" style="color:#10b981; font-size:1.8rem; font-weight:800;">3.1 mg/m³</div>
+                  <div class="telemetry-status status-ok" style="margin-top:0.3rem;">High Plankton Feed Density</div>
+                </div>
+
+                <!-- 7. SEA SURFACE SALINITY -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-flask" style="color:#60a5fa;"></i> Sea Surface Salinity</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">WATER DENSITY</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-salinity" style="color:#60a5fa; font-size:1.8rem; font-weight:800;">34.8 PSU</div>
+                  <div class="telemetry-status status-ok" style="margin-top:0.3rem;">Normal Pelagic Salinity Level</div>
+                </div>
+
+                <!-- 8. UNDERWATER VISIBILITY & TIDE -->
+                <div class="telemetry-box" style="padding: 1.1rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                    <span class="telemetry-label" style="font-weight:700;"><i class="fa-solid fa-eye" style="color:#06b6d4;"></i> Water Clarity & Tide</span>
+                    <span class="card-badge badge-safe" style="font-size:0.6rem;">OPTICAL CLARITY</span>
+                  </div>
+                  <div class="telemetry-value" id="openmeteo-visibility" style="color:#06b6d4; font-size:1.8rem; font-weight:800;">14.5 m</div>
+                  <div class="telemetry-status status-ok" id="openmeteo-tide" style="margin-top:0.3rem;">+0.4m High Flood Tide</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- KEY OCEAN FEATURES & AI ENVIRONMENTAL ADVISORY PANEL -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              
+              <!-- Feature Card 1: Oceanographic Features & Analysis -->
+              <div class="card" style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div class="card-title" style="font-size:0.95rem; color:var(--primary-cyan);">
+                  <i class="fa-solid fa-circle-nodes"></i> Advanced Coastal Ocean Features
+                </div>
+
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:0.65rem; font-size:0.82rem;">
+                  <li style="display:flex; align-items:flex-start; gap:0.6rem; background:rgba(6, 182, 212, 0.08); padding:0.6rem 0.75rem; border-radius:6px; border:1px solid rgba(6, 182, 212, 0.2);">
+                    <i class="fa-solid fa-satellite" style="color:var(--primary-cyan); margin-top:0.15rem;"></i>
+                    <div>
+                      <strong style="color:var(--primary-cyan);">ISRO OceanSat-3 Thermal Gradients:</strong>
+                      <p style="color:var(--text-muted); margin:0;">Thermal boundary convergence detected near Zone B. SST gradient differential of 0.8°C creates optimal pelagic fish retention zone.</p>
+                    </div>
+                  </li>
+                  <li style="display:flex; align-items:flex-start; gap:0.6rem; background:rgba(16, 185, 129, 0.08); padding:0.6rem 0.75rem; border-radius:6px; border:1px solid rgba(16, 185, 129, 0.2);">
+                    <i class="fa-solid fa-wind" style="color:var(--status-safe); margin-top:0.15rem;"></i>
+                    <div>
+                      <strong style="color:var(--status-safe);">Surface Drift & Upwelling Vectors:</strong>
+                      <p style="color:var(--text-muted); margin:0;">0.58 m/s eastward current drift pushes nutrient-rich coastal waters into shallow shelf banks, increasing catch probability.</p>
+                    </div>
+                  </li>
+                  <li style="display:flex; align-items:flex-start; gap:0.6rem; background:rgba(245, 158, 11, 0.08); padding:0.6rem 0.75rem; border-radius:6px; border:1px solid rgba(245, 158, 11, 0.2);">
+                    <i class="fa-solid fa-shield-halved" style="color:var(--status-caution); margin-top:0.15rem;"></i>
+                    <div>
+                      <strong style="color:var(--status-caution);">INSAT-3DR Atmospheric Sounder Risk Status:</strong>
+                      <p style="color:var(--text-muted); margin:0;">Zero convective squall clusters detected within 50nm. Atmospheric pressure stable at 1012.4 hPa with low wave swell impact.</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Feature Card 2: 7-Day Coastal Marine Weather & Ocean Outlook -->
+              <div class="card" style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div class="card-title" style="font-size:0.95rem; color:var(--status-safe);">
+                  <i class="fa-solid fa-calendar-days"></i> 7-Day Open-Meteo Coastal & Marine Forecast
+                </div>
+
+                <div id="openmeteo-daily-forecast-container" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; overflow-x: auto;">
+                  <div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">Loading Open-Meteo marine forecast data...</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Hourly Forecast Trends Chart Card -->
+            <div class="card" style="margin-bottom: 1rem;">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div class="card-title" style="font-size: 0.95rem; color: var(--primary-cyan);">
+                  <i class="fa-solid fa-chart-line"></i> 24-Hour Ocean Telemetry Stream (Sea Temp vs Wave Height vs Wind)
+                </div>
+                <span class="card-badge badge-safe">Open-Meteo & Marine API Stream</span>
+              </div>
+              <div class="chart-container" style="height: 200px; margin-top: 0.75rem;">
+                <canvas id="openMeteoHourlyChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Open-Meteo API Endpoint Live Query Inspector -->
+            <div class="card">
+              <div class="card-title" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-link"></i> Live Open-Meteo API & Marine Endpoint Links
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; background: rgba(3, 7, 18, 0.7); border: 1px solid var(--border-color); padding: 0.5rem 0.6rem; border-radius: var(--radius-sm);">
+                  <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; white-space:nowrap;">Forecast API:</span>
+                  <input type="text" id="txt-openmeteo-url" readonly style="flex:1; background:transparent; border:none; color:var(--primary-cyan); font-family:monospace; font-size:0.75rem; outline:none;" value="https://api.open-meteo.com/v1/forecast?latitude=9.2876&longitude=79.3129&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,uv_index_max,uv_index_clear_sky_max,sunrise,sunset,daylight_duration,sunshine_duration,moonrise,moonset,moon_phase,rain_sum,snowfall_sum,precipitation_sum,precipitation_hours,showers_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,shortwave_radiation_sum,wind_direction_10m_dominant,et0_fao_evapotranspiration&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snow_depth,snowfall,weather_code,pressure_msl,surface_pressure,cloud_cover,cloud_cover_high,cloud_cover_mid,cloud_cover_low,visibility,evapotranspiration,et0_fao_evapotranspiration,vapour_pressure_deficit,soil_temperature_0cm,soil_moisture_0_to_1cm,wind_speed_10m,wind_speed_80m,wind_speed_120m,wind_speed_180m,wind_direction_10m,wind_direction_80m,wind_direction_120m,wind_direction_180m,wind_gusts_10m,temperature_80m,temperature_120m,temperature_180m&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m">
+                  <button class="terminal-btn-sm" onclick="copyOpenMeteoUrl()"><i class="fa-solid fa-copy"></i> Copy Forecast API</button>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; align-items: center; background: rgba(3, 7, 18, 0.7); border: 1px solid var(--border-color); padding: 0.5rem 0.6rem; border-radius: var(--radius-sm);">
+                  <span style="font-size:0.72rem; color:var(--text-muted); font-weight:700; white-space:nowrap;">Marine API:</span>
+                  <input type="text" id="txt-openmeteo-marine-url" readonly style="flex:1; background:transparent; border:none; color:var(--accent-teal); font-family:monospace; font-size:0.75rem; outline:none;" value="https://marine-api.open-meteo.com/v1/marine?latitude=9.2876&longitude=79.3129&current=wave_height,wave_direction,wave_period,wind_wave_height,swell_wave_height,ocean_current_velocity,ocean_current_direction">
+                  <button class="terminal-btn-sm" onclick="copyMarineUrl()"><i class="fa-solid fa-copy"></i> Copy Marine API</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIEW 11: FISHERMAN SERVICES ================= -->
+      <div id="view-services" class="view-panel">
+        <div class="view-split-layout">
+          <div class="persistent-left-nav" data-current="services"></div>
+          <div class="view-right-content">
+            <div class="card">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="section-breadcrumb"><button class="section-home-btn" onclick="switchNav('dashboard')"><i class="fa-solid fa-grip"></i> Dashboard</button> <i class="fa-solid fa-chevron-right" style="font-size:0.65rem; color:var(--text-dim);"></i></div>
+                  <div class="card-title"><i class="fa-solid fa-handshake"></i> <span data-i18n="nav_services">Fisherman Services & Marketplace</span></div>
+                </div>
+              </div>
+              <p style="color:var(--text-muted); margin-bottom: 1.25rem;">Direct harbor buyer auctions with photo upload, government scheme applications, educational scholarships, and instant emergency dispatch beacons.</p>
+              
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1.25rem;">
+                <!-- 1. SELL MY CATCH -->
+                <div class="telemetry-box clickable-service-card" onclick="openSellCatchModal()" style="padding:1.5rem; cursor:pointer; text-align:center;">
+                  <i class="fa-solid fa-cash-register" style="font-size:2.2rem; color:var(--primary-cyan); margin-bottom:0.75rem;"></i>
+                  <h3 style="color:var(--primary-cyan); font-size:1.1rem; margin-bottom:0.4rem;">Sell My Catch</h3>
+                  <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.8rem;">Upload catch photo, specify species & quantity for direct harbor buyer auctions</p>
+                  <button class="layer-btn active" style="width:100%; pointer-events:none;"><i class="fa-solid fa-upload"></i> Upload & Sell Catch</button>
+                </div>
+
+                <!-- 2. GOVT SCHEMES & SCHOLARSHIPS -->
+                <div class="telemetry-box clickable-service-card" onclick="openGovtSchemesModal()" style="padding:1.5rem; cursor:pointer; text-align:center;">
+                  <i class="fa-solid fa-building-columns" style="font-size:2.2rem; color:var(--status-safe); margin-bottom:0.75rem;"></i>
+                  <h3 style="color:var(--status-safe); font-size:1.1rem; margin-bottom:0.4rem;">Govt Schemes & Scholarships</h3>
+                  <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.8rem;">PMMSY Subsidies, KCC Loans, Educational Scholarships & Vessel Insurance</p>
+                  <button class="layer-btn" style="width:100%; border-color:var(--status-safe); color:var(--status-safe); pointer-events:none;"><i class="fa-solid fa-graduation-cap"></i> View Schemes & Apply</button>
+                </div>
+
+                <!-- 3. SOS RESCUE BEACON -->
+                <div class="telemetry-box clickable-service-card" onclick="triggerSOSRescue()" style="padding:1.5rem; border-color:var(--status-unsafe); cursor:pointer; text-align:center; background:rgba(239, 68, 68, 0.08);">
+                  <i class="fa-solid fa-tower-broadcast fa-beat-fade" style="font-size:2.2rem; color:var(--status-unsafe); margin-bottom:0.75rem;"></i>
+                  <h3 style="color:var(--status-unsafe); font-size:1.1rem; margin-bottom:0.4rem;">SOS Rescue Beacon</h3>
+                  <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.8rem;">Instant emergency distress signal to Indian Coast Guard (1554) & Marine Police</p>
+                  <button class="layer-btn" style="width:100%; background:var(--status-unsafe); border-color:var(--status-unsafe); color:#fff; pointer-events:none;"><i class="fa-solid fa-triangle-exclamation"></i> Trigger SOS Signal</button>
+                </div>
+              </div>
+
+              <!-- RECENT CATCH AUCTION LISTINGS SECTION -->
+              <div style="margin-top: 2rem;">
+                <div class="card-title" style="margin-bottom: 1rem;"><i class="fa-solid fa-store"></i> Active Harbor Auction Listings</div>
+                <div id="active-catch-auctions" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                  <div class="pfz-item">
+                    <div>
+                      <h4 style="color:var(--primary-cyan);">Fresh Seerfish / Kingfish Batch (45 kg)</h4>
+                      <p>Harbor: Rameswaram Main Jetty | Seller: Vessel IND-TN-10</p>
+                      <small>Asking Price: ₹620 / kg | Uploaded photo verified by AI Quality Inspector</small>
+                    </div>
+                    <span class="card-badge badge-safe">BIDDING OPEN</span>
+                  </div>
+                  <div class="pfz-item">
+                    <div>
+                      <h4 style="color:var(--primary-cyan);">Yellowfin Tuna & Skipjack (120 kg)</h4>
+                      <p>Harbor: Kochi Deepsea Terminal | Seller: Vessel IND-KL-04</p>
+                      <small>Asking Price: ₹410 / kg | NavIC Telemetry Verified Catch Zone B</small>
+                    </div>
+                    <span class="card-badge badge-safe">BIDDING OPEN</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- FOOTER ARCHITECTURE SUMMARY BAR -->
+  <footer class="app-footer">
+    <div class="footer-pipeline">
+      <i class="fa-solid fa-network-wired"></i>
+      <span><strong>Architecture Flow:</strong> Earth Observation + Oceanographic + Weather + GIS + Sensors ➔ <strong>Collaborative Agentic AI</strong> ➔ Fishing Zone + Sea Safety + Route + Hazard Alerts</span>
+    </div>
+    <div>
+      <span>Marine AI v2.6 | Built for ISRO PS 26176 | SIH 2026</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ================= SELL MY CATCH MODAL ================= -->
+<div id="sell-catch-modal" class="modal-backdrop" onclick="toggleModal('sell-catch-modal', false)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="fa-solid fa-cash-register" style="color: var(--primary-cyan);"></i>
+        <span>Sell My Catch – Harbor Buyer Auction Listing</span>
+      </div>
+      <button class="close-modal-btn" onclick="toggleModal('sell-catch-modal', false)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <form onsubmit="submitCatchForm(event)" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+      <div>
+        <label style="display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-main);">Fish Species / Catch Title</label>
+        <select id="catch-species" required style="width:100%; padding:0.6rem; background:rgba(3,7,18,0.7); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
+          <option value="Seerfish / Kingfish (Vanjaram)">Seerfish / Kingfish (Vanjaram)</option>
+          <option value="Yellowfin / Skipjack Tuna">Yellowfin / Skipjack Tuna</option>
+          <option value="Mackerel / Nethili">Mackerel / Nethili</option>
+          <option value="Tiger Prawns / Shrimp">Tiger Prawns / Shrimp</option>
+          <option value="Pomfret / Karuppu Vaaval">Pomfret / Karuppu Vaaval</option>
+          <option value="Other Mixed Pelagic Catch">Other Mixed Pelagic Catch</option>
+        </select>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <div>
+          <label style="display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-main);">Quantity / Weight (kg)</label>
+          <input type="number" id="catch-quantity" placeholder="e.g. 85" min="1" required style="width:100%; padding:0.6rem; background:rgba(3,7,18,0.7); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
+        </div>
+        <div>
+          <label style="display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-main);">Target Price (₹ per kg)</label>
+          <input type="number" id="catch-price" placeholder="e.g. 550" min="1" required style="width:100%; padding:0.6rem; background:rgba(3,7,18,0.7); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-main);">Harbor / Landing Center</label>
+        <select id="catch-harbor" style="width:100%; padding:0.6rem; background:rgba(3,7,18,0.7); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px;">
+          <option value="Rameswaram Main Fishing Harbor">Rameswaram Main Fishing Harbor</option>
+          <option value="Visakhapatnam Fishing Harbor">Visakhapatnam Fishing Harbor</option>
+          <option value="Kochi Deepsea Fishing Jetty">Kochi Deepsea Fishing Jetty</option>
+          <option value="Veraval Port Jetty">Veraval Port Jetty</option>
+          <option value="Paradip Fishing Harbor">Paradip Fishing Harbor</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-main);">Upload Catch Photos / Inspection File 📷</label>
+        <input type="file" id="catch-file-input" accept="image/*,.pdf" style="width:100%; padding:0.6rem; background:rgba(3,7,18,0.7); border:1px dashed var(--primary-cyan); color:var(--text-main); border-radius:6px;">
+        <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.3rem; display:block;">Select photos or files from your device to verify catch quality.</small>
+      </div>
+
+      <button type="submit" class="layer-btn active" style="padding:0.75rem; font-size:0.95rem; margin-top:0.5rem;"><i class="fa-solid fa-paper-plane"></i> Publish Auction Listing</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= GOVT SCHEMES & SCHOLARSHIPS MODAL ================= -->
+<div id="govt-schemes-modal" class="modal-backdrop" onclick="toggleModal('govt-schemes-modal', false)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 750px; max-height: 85vh; overflow-y: auto;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="fa-solid fa-building-columns" style="color: var(--status-safe);"></i>
+        <span>Government Schemes, Welfare Benefits & Educational Scholarships</span>
+      </div>
+      <button class="close-modal-btn" onclick="toggleModal('govt-schemes-modal', false)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:1rem; margin-top:1rem;">
+      <!-- Scheme 1 -->
+      <div class="pfz-item" style="border-left: 4px solid var(--status-safe); flex-direction:column; align-items:flex-start; gap:0.5rem;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <h4 style="color:var(--status-safe);"><i class="fa-solid fa-graduation-cap"></i> Fishermen Children Educational Scholarship Scheme 🎓</h4>
+          <span class="card-badge badge-safe">ACTIVE SCHOLARSHIP</span>
+        </div>
+        <p style="color:var(--text-main); font-size:0.85rem;">Financial grant of <strong>₹12,000 to ₹50,000 / year</strong> for children of active registered fishermen pursuing Higher Education, B.Sc Marine Biology, B.E / B.Tech Engineering, ITI, or Diploma courses.</p>
+        <div style="display:flex; gap:1rem; align-items:center; width:100%; margin-top:0.25rem;">
+          <small style="color:var(--text-muted);"><i class="fa-solid fa-circle-check" style="color:var(--status-safe);"></i> Eligibility: Registered Fishermen Identity Card Holder</small>
+          <button class="layer-btn active" style="margin-left:auto; padding:0.35rem 0.8rem;" onclick="applyScheme('Fishermen Children Educational Scholarship')">Apply for Scholarship</button>
+        </div>
+      </div>
+
+      <!-- Scheme 2 -->
+      <div class="pfz-item" style="border-left: 4px solid var(--primary-cyan); flex-direction:column; align-items:flex-start; gap:0.5rem;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <h4 style="color:var(--primary-cyan);"><i class="fa-solid fa-ship"></i> PMMSY Vessel Motorization & Gear Subsidy</h4>
+          <span class="card-badge badge-safe">PMMSY GOVT SCHEME</span>
+        </div>
+        <p style="color:var(--text-main); font-size:0.85rem;">Pradhan Mantri Matsya Sampada Yojana offering up to <strong>60% capital subsidy</strong> for outboard boat motor replacement, bio-toilets, cold storage ice boxes, and deep sea gillnet gear.</p>
+        <div style="display:flex; gap:1rem; align-items:center; width:100%; margin-top:0.25rem;">
+          <small style="color:var(--text-muted);"><i class="fa-solid fa-circle-check" style="color:var(--status-safe);"></i> Benefit: Up to ₹1,80,000 Grant per Boat</small>
+          <button class="layer-btn active" style="margin-left:auto; padding:0.35rem 0.8rem;" onclick="applyScheme('PMMSY Vessel & Gear Subsidy')">Apply Now</button>
+        </div>
+      </div>
+
+      <!-- Scheme 3 -->
+      <div class="pfz-item" style="border-left: 4px solid var(--accent-teal); flex-direction:column; align-items:flex-start; gap:0.5rem;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <h4 style="color:var(--accent-teal);"><i class="fa-solid fa-credit-card"></i> Kisan Credit Card (KCC) for Fisheries</h4>
+          <span class="card-badge badge-safe">4% INTEREST RATE</span>
+        </div>
+        <p style="color:var(--text-main); font-size:0.85rem;">Collateral-free working capital loan up to <strong>₹3,00,000 at 4% subsidized interest rate</strong> for fuel, bait, net repairs, and voyage expenditure.</p>
+        <div style="display:flex; gap:1rem; align-items:center; width:100%; margin-top:0.25rem;">
+          <small style="color:var(--text-muted);"><i class="fa-solid fa-circle-check" style="color:var(--status-safe);"></i> Direct Transfer via NABARD / Nationalized Banks</small>
+          <button class="layer-btn active" style="margin-left:auto; padding:0.35rem 0.8rem;" onclick="applyScheme('Kisan Credit Card (KCC)')">Apply for KCC</button>
+        </div>
+      </div>
+
+      <!-- Scheme 4 -->
+      <div class="pfz-item" style="border-left: 4px solid #f59e0b; flex-direction:column; align-items:flex-start; gap:0.5rem;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <h4 style="color:#f59e0b;"><i class="fa-solid fa-shield-heart"></i> Group Marine Life & Disability Insurance</h4>
+          <span class="card-badge badge-safe">100% FREE COVER</span>
+        </div>
+        <p style="color:var(--text-main); font-size:0.85rem;">Comprehensive accidental death and total disability cover up to <strong>₹5,00,000</strong> for active fishermen operating in coastal and deepsea Indian waters.</p>
+        <div style="display:flex; gap:1rem; align-items:center; width:100%; margin-top:0.25rem;">
+          <small style="color:var(--text-muted);"><i class="fa-solid fa-circle-check" style="color:var(--status-safe);"></i> Premium Paid 100% by Ministry of Fisheries</small>
+          <button class="layer-btn active" style="margin-left:auto; padding:0.35rem 0.8rem;" onclick="applyScheme('Fishermen Group Marine Insurance')">Claim Cover</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SOS EMERGENCY BROADCAST MODAL ================= -->
+<div id="sos-rescue-modal" class="modal-backdrop" onclick="toggleModal('sos-rescue-modal', false)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 650px; border-color: var(--status-unsafe); background: #0b1120;">
+    <div class="modal-header" style="border-bottom:1px solid rgba(239, 68, 68, 0.3);">
+      <div class="modal-title" style="color: var(--status-unsafe);">
+        <i class="fa-solid fa-triangle-exclamation fa-beat" style="color: var(--status-unsafe);"></i>
+        <span>EMERGENCY DISTRESS BEACON ACTIVATED</span>
+      </div>
+      <button class="close-modal-btn" onclick="toggleModal('sos-rescue-modal', false)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--status-unsafe); border-radius: 8px; padding: 1rem; text-align: center;">
+        <h3 style="color: #f87171; font-size: 1.1rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-satellite-dish fa-spin"></i> BROADCASTING DISTRESS SIGNAL TO COAST GUARD & MARINE POLICE</h3>
+        <p style="font-size: 0.85rem; color: var(--text-main);">NavIC Emergency Satellite Transceiver actively transmitting vessel location & telemetric strain diagnostics.</p>
+      </div>
+
+      <div class="telemetry-primary-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="telemetry-box">
+          <div class="telemetry-label">Vessel Reg ID</div>
+          <div class="telemetry-value" style="font-size:1rem; color:var(--primary-cyan);">IND-TN-10-MM-4421</div>
+          <div class="telemetry-status status-ok">Registered Trawler</div>
+        </div>
+        <div class="telemetry-box">
+          <div class="telemetry-label">Live NavIC Coordinates</div>
+          <div class="telemetry-value" style="font-size:1rem; color:#fbbf24;" id="sos-live-coords">09.2876° N, 79.3129° E</div>
+          <div class="telemetry-status status-ok">GPS Signal Locked</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(3, 7, 18, 0.6); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.85rem;">
+        <h5 style="color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem;"><i class="fa-solid fa-tower-cell"></i> Emergency Dispatch Routing Matrix:</h5>
+        <ul style="list-style: none; font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.35rem;">
+          <li style="color: #10b981;"><i class="fa-solid fa-circle-check"></i> <strong>Indian Coast Guard MRCC (Toll Free 1554):</strong> Alert Dispatched (ACK Received)</li>
+          <li style="color: #10b981;"><i class="fa-solid fa-circle-check"></i> <strong>Coastal Marine Police Station (Rameswaram Division):</strong> SMS & NavIC Location Synced</li>
+          <li style="color: #10b981;"><i class="fa-solid fa-circle-check"></i> <strong>Nearby Fishermen Mesh Network (5nm Radius):</strong> Distress Audio Beacon Pulsing</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+        <button class="layer-btn active" style="flex: 1; background: #dc2626; border-color: #ef4444; padding: 0.75rem;" onclick="callEmergencyNumber()">
+          <i class="fa-solid fa-phone-volume"></i> Call Coast Guard Direct (1554)
+        </button>
+        <button class="layer-btn" style="padding: 0.75rem;" onclick="toggleModal('sos-rescue-modal', false)">
+          Cancel SOS Alert
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet GIS Map JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Application JavaScript -->
+<script src="app.js"></script>
+
+</body>
+</html>
